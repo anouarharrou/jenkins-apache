@@ -11,7 +11,7 @@ pipeline {
         stage('DEPLOY') {
             steps {
                 withCredentials([ 
-                    string(credentialsId: 'PAT', variable: 'SSHKEY'),
+                    secretText(credentialsId: 'PAT', variable: 'SSHKEY'),
                     file(credentialsId: 'kube-config', variable: 'KUBECONFIG')
                 ]) {
                     sh """
