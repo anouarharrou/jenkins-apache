@@ -9,11 +9,11 @@ pipeline {
         }
 
         stage('DEPLOY') {
-            withCredentials([ 
-            file(credentialsId: 'PAT', variable: 'SSHKEY'),
-            file(credentialsId: 'kube-config', variable: 'KUBECONFIG')
-            ]) 
             steps {
+                withCredentials([ 
+                    file(credentialsId: 'PAT', variable: 'SSHKEY'),
+                    file(credentialsId: 'kube-config', variable: 'KUBECONFIG')
+                ]) {
                     sh """
                     cd ansible
                     echo " This will deploy the service: ${SERVICE} with version: ${VERSION}"
@@ -24,5 +24,4 @@ pipeline {
             }
         }
     }
-
-
+}
