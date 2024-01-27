@@ -1,0 +1,67 @@
+---
+- name: Ensure group app exists
+  group:
+    name: "{{ owner }}"
+    state: present
+  become: true
+
+- name: Add the user app with a specific uid and a primary group of app
+  user:
+    name: "{{ owner }}"
+    comment: "{{ owner }} user"
+    uid: 1007
+    group: "{{ owner }}"
+  become: true
+
+- name: Create app directory
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  become: true
+
+- name: Create work directory
+  file:
+    path: "{{ work_dir }}"
+    state: directory
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  become: true
+
+- name: Create logs directory
+  file:
+    path: "{{ logs_dir }}"
+    state: directory
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  become: true
+
+- name: Grant permission to user app for logs directory
+  file:
+    path: "{{ logs_dir }}"
+    state: directory
+    mode: '0755'  # Adjust the mode based on your requirements
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  become: true
+  
+- name: Change ownership of service.log
+  command: chown {{ owner }}:{{ owner }} {{ logs_dir }}/service.log
+
+- name: Create tmp directory
+  file:
+    path: "{{ tmp_dir }}"
+    state: directory
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  become: true
+
+- name: Create config directory
+  file:
+    path: "{{ config_dir }}"
+    state: directory
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  become: true
+

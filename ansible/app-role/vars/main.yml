@@ -1,0 +1,7 @@
+---
+owner: app
+app_dir: "/home/app"
+logs_dir: "{{ app_dir }}/logs"
+config_dir: "{{ app_dir }}/config"
+tmp_dir: "{{ app_dir }}/tmp"
+work_dir: "{{ app_dir }}/work"

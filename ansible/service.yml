@@ -1,0 +1,8 @@
+---
+- name: Deploy {{ service }}service
+  hosts: all
+  become: yes
+
+  roles:
+    - {{ service }}-role  
+

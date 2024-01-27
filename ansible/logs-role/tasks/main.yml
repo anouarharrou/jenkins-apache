@@ -1,0 +1,33 @@
+- name: Find logs to delete
+  find:
+    paths: "{{logs_dir}}"
+    patterns: "{{logs_pattern}}"
+  register: log_files
+  become: true
+
+- name: Archive logs
+  command: "tar -czvf {{ logs_dir }}/{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}logs.tar.gz {% for file in log_files.files %}{{ file.path }} {% endfor %}"
+  args:
+    executable: /bin/bash  # Specify the shell to execute the command
+  become: true
+
+- name: Wait for the archive to be created
+  wait_for:
+    path: "{{ logs_dir }}/{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}logs.tar.gz"
+    state: present
+  become: true
+
+
+- name: Upload logs.tar.gz to S3 bucket
+  command: "aws s3 cp {{ logs_dir }}/{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}logs.tar.gz s3://{{path_S3}} --endpoint-url={{endpoint}} --no-verify-ssl"
+  become: true
+  environment:
+    AWS_ACCESS_KEY_ID: "{{ aws_id }}"
+    AWS_SECRET_ACCESS_KEY: "{{ aws_key }}"
+
+- name: Delete logs
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ log_files.files }}"
+  become: true

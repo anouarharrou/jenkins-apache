@@ -1,0 +1,115 @@
+---
+#- name: "[fabio] Transfer artifact"
+#  copy:
+#    src: "/tmp/fabio"
+#    dest: "/usr/bin/fabio"
+#    mode: a+x
+#    owner: "{{ owner }}"
+#    group: "{{ owner }}"
+#  become: true
+
+- name: "[fabio] Transfer artifact"
+  ansible.builtin.get_url:
+    url: "https://objs3parstd01.fr.world.socgen/xsf-af567-prd-artifacts/public/fabio/1.6.2/fabio-1.6.2-linux_amd64"
+    dest: "/usr/bin/fabio"
+    mode: a+x
+    owner: "{{ owner }}"
+    group: "{{ owner }}"
+  become: true
+    
+- name: Create fabio directory
+  file:
+    path: "/etc/fabio/"
+    state: directory
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  become: true
+
+- name: "Prepare fabio files (fabio.properties)"
+  become: true
+  copy:
+    dest: "/etc/fabio/fabio.properties"
+    content: |
+      proxy.addr=:8443
+      registry.backend=file
+      registry.file.path=/etc/fabio/routes.properties
+      registry.file.noroutehtmlpath=/etc/fabio/no-route.html
+      ui.addr=:9998
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  when: certificate == "none"
+
+- name: "Prepare fabio files (fabio.properties)"
+  become: true
+  copy:
+    dest: "/etc/fabio/fabio.properties"
+    content: |
+      proxy.addr=:{{ proxy_port }};cs=app
+      registry.backend=file
+      registry.file.path=/etc/fabio/routes.properties
+      registry.file.noroutehtmlpath=/etc/fabio/no-route.html
+      ui.addr=:9998
+      proxy.cs=cs=app;type=file;cert=/etc/fabio/{{certificate}}.crt;key=/etc/fabio/{{certificate}}.key
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+  when: certificate != "none"
+
+- name: "Prepare fabio files (no-route.html)"
+  become: true
+  copy:
+    dest: "/etc/fabio/no-route.html"
+    content: |
+      <html><body><h1>404: no fabio route defined for this path</h1></body></html>
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+
+- name: "Prepare fabio files (routes.properties)"
+  become: true
+  copy:
+    dest: "/etc/fabio/routes.properties"
+    content: |
+      route add srv / {{ upstream_url }} opts "proto={{ upstream_proto }} tlsskipverify=true"
+    group: "{{ owner }}"
+    owner: "{{ owner }}"
+
+
+- name: "[fabio] Create systemd service"
+  become: true
+  copy:
+    dest: "/etc/systemd/system/fabio.service"
+    content: |
+      [Unit]
+      Description=fabio
+
+      [Service]
+      Type=idle
+      User=root
+      Group=root
+      WorkingDirectory={{ work_dir }}
+      ExecStart=/usr/bin/fabio -cfg /etc/fabio/fabio.properties
+      LimitMEMLOCK=infinity
+      LimitNOFILE=65535
+      TimeoutStartSec=600
+      TimeoutStopSec=600
+
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Reload systemd daemon
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: crond
+  become: true
+
+- name: "[fabio] Ensure service is enabled"
+  service:
+    name: "fabio"
+    state: restarted
+    enabled: true
+  become: true
+
+- name: Wait for port {{ proxy_port }}
+  wait_for:
+    port: "{{ proxy_port }}"
+    timeout: 30
