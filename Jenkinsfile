@@ -11,6 +11,7 @@ pipeline {
         stage('DEPLOY') {
             steps {
                 echo "Hello!"
+                echo "This script will deploy: ${SERVICE} with version ${VERSION}"
             }
         }
     }
