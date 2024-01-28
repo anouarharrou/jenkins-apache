@@ -80,7 +80,7 @@ function InstallOnUbuntu() {
 
 
     # Step 5: Setting up Apache as a Reverse Proxy
-    sudo bash -c "cat <<EOF > /etc/apache2/sites-available/jenkins.conf
+    sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
     <VirtualHost *:80>
         ServerName $DOMAIN
         Redirect permanent / https://$DOMAIN/
@@ -106,7 +106,7 @@ function InstallOnUbuntu() {
         ProxyPassReverse / http://localhost:8080/
         ProxyPassReverse / https://$DOMAIN/
     </VirtualHost>
-    EOF"
+    EOF
 
     echo "Apache configured successfully."
     sleep 3  # Give a few seconds to read the message
