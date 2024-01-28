@@ -135,8 +135,6 @@ EOF
         exit 0
     fi
 
-    # Step 6: Access Jenkins
-
     #  Install Ansible
     # Step 1: Update the system
     sudo apt update -y
@@ -160,6 +158,121 @@ EOF
 }
 
 function InstallOnCentOS() {
+    # Step 1: Update the System
+    sudo yum update -y
 
-    echo "CentOS 7 is not supported yet."
+    # Step 2: Install Apache Web Server
+    sudo yum install httpd -y
+    sudo systemctl enable httpd && sudo systemctl start httpd
+
+    # Step 3: Install Java
+    sudo yum install java-11-openjdk -y
+    java --version
+
+    # Step 4: Install Jenkins
+    sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+    sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+    sudo yum install jenkins -y
+    sudo systemctl start jenkins && sudo systemctl enable jenkins
+
+    # Display status and allow user to skip with Ctrl+C
+    echo "Checking Apache status..."
+    echo "Press Ctrl+C to skip and continue with the installation."
+    sleep 5  # Give a few seconds to press Ctrl+C
+    sudo systemctl status httpd || true  # "|| true" ignores the exit status of the status command
+
+    # Prompt user for passphrase
+    read -s -p "Enter passphrase for SSL certificate: " PASSPHRASE
+    echo
+
+    # Prompt user for certificate details
+    read -p "Country Name (2 letter code) [AU]: " COUNTRY
+    read -p "State or Province Name (full name) [Some-State]: " STATE
+    read -p "Locality Name (eg, city) []: " CITY
+    read -p "Organization Name (eg, company) [Internet Widgits Pty Ltd]: " ORG
+    read -p "Organizational Unit Name (eg, section) []: " ORG_UNIT
+    read -p "Common Name (e.g. server FQDN or YOUR name) []: " DOMAIN
+    read -p "Email Address []: " EMAIL
+
+    # Generate the Self-Signed SSL Certificate
+    openssl req -x509 -newkey rsa:4096 -keyout jenkins.key -out jenkins.crt -days 365 -passin pass:"$PASSPHRASE" \
+        -subj "/C=$COUNTRY/ST=$STATE/L=$CITY/O=$ORG/OU=$ORG_UNIT/CN=$DOMAIN/emailAddress=$EMAIL"
+
+    echo "Self-Signed SSL Certificate generated successfully."
+    sleep 5  # Give a few seconds to read the message
+
+    # Copy the Certificate and Key to the /etc/pki/tls/certs and /etc/pki/tls/private directories
+    sudo cp jenkins.crt /etc/pki/tls/certs/
+    sudo cp jenkins.key /etc/pki/tls/private/
+    echo "Certificate and Key copied to /etc/pki/tls directory successfully."
+
+    # Specify your server's fully qualified domain name
+    FQDN="$DOMAIN"
+
+    # Update the Apache global configuration file with ServerName
+    echo "ServerName $FQDN" | sudo tee -a /etc/httpd/conf/httpd.conf
+
+    # Step 5: Setting up Apache as a Reverse Proxy
+    sudo tee /etc/httpd/conf.d/jenkins.conf > /dev/null <<EOF
+<VirtualHost *:80>
+    ServerName $DOMAIN
+    Redirect permanent / https://$DOMAIN/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName $DOMAIN
+
+    SSLEngine on
+    SSLCertificateFile /etc/pki/tls/certs/jenkins.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/jenkins.key
+
+    ProxyRequests Off
+    ProxyPreserveHost On
+    AllowEncodedSlashes NoDecode
+
+    <Proxy http://localhost:8080/*>
+        Order deny,allow
+        Allow from all
+    </Proxy>
+
+    ProxyPass / http://localhost:8080/ nocanon
+    ProxyPassReverse / http://localhost:8080/
+    ProxyPassReverse / https://$DOMAIN/
+</VirtualHost>
+EOF
+
+    echo "Apache configured successfully."
+    sleep 3  # Give a few seconds to read the message
+
+    # Configure Jenkins /etc/sysconfig/jenkins
+    sudo sed -i "s#JENKINS_PORT=\"8080\"#JENKINS_PORT=\"8080\"\nJENKINS_HTTPS_PORT=\"8443\"\nJENKINS_HTTPS_KEYSTORE=\"/etc/pki/tls/certs/jenkins.crt\"\nJENKINS_HTTPS_KEYSTORE_PASSWORD=\"$PASSPHRASE\"#" /etc/sysconfig/jenkins
+
+    echo "Jenkins configured successfully."
+    sleep 3 # Give a few seconds to read the message
+
+    # Restart Jenkins and Apache
+    sudo systemctl restart httpd
+
+    # Prompt user for confirmation to install Ansible
+    read -p "Do you want to proceed with Ansible installation? (y/n): " ANSWER
+    if [ "$ANSWER" != "y" ]; then
+        echo "Ansible installation skipped."
+        sleep 2
+        echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
+        exit 0
+    fi
+
+    #  Install Ansible
+    # Step 1: Install EPEL repository
+    sudo yum install epel-release -y
+
+    # Step 2: Install Ansible
+    sudo yum install ansible -y
+
+    # Step 3: Display Ansible Version
+    ansible --version
+
+    echo "Ansible has been installed successfully."
+    sleep 3  # Give a few seconds to read the message
+    echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
 }
