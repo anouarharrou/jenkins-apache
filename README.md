@@ -9,8 +9,8 @@ This repository contains scripts to set up a DevOps environment with Jenkins, Ap
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/yourusername/devops-setup.git
-cd devops-setup
+git clone https://github.com/anouarharrou/jenkins-ansible-roles.gitt
+cd jenkins-ansible-roles
 ```
 Make it executable:
 
