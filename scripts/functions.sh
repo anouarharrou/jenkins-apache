@@ -108,6 +108,7 @@ function InstallOnUbuntu() {
     </VirtualHost>
     EOF
 
+
     echo "Apache configured successfully."
     sleep 3  # Give a few seconds to read the message
 

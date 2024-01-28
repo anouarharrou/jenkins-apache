@@ -11,7 +11,7 @@ source ./scripts/functions.sh > /dev/null 2>&1 || source functions.sh > /dev/nul
 
 ########## JENKINS APACHE 2 DEPLOYMENT ##########
 
-echo ""
+echo "==========================================================================================="
 echo -e '\E[1m'"\033[1mJENKINS INSTALLATION ALONG WITH APACHE2 WEB SERVER\033[0m"
 echo -e '\E[1m'"\033[1mAUTHOR: ANOUAR HARROU\033[0m"
 echo ""
@@ -20,15 +20,15 @@ echo ""
 echo -e '\E[1m'"\033[1m- Jenkins installation and configuration.\033[0m"
 echo -e '\E[1m'"\033[1m- Apache2 web server setup as a reverse proxy for Jenkins.\033[0m"
 echo -e '\E[1m'"\033[1m- Self-signed SSL certificate generation for secure communication.\033[0m"
-echo ""
+echo "==========================================================================================="
 
 GetConfirmation
 
  # Detect Linux Distribution
- DIST=$(awk -F= '/^PRETTY_NAME/{print $2}' /etc/os-release)
+DIST=$(awk -F= '/^PRETTY_NAME/{print $2}' /etc/os-release)
  if [[ $DIST == *"Ubuntu"* ]]; then
      InstallOnUbuntu
-elif [[ $DIST == *"CentOS Linux 7"* ]]; then
+ elif [[ $DIST == *"CentOS Linux 7"* ]]; then
      InstallOnCentOS
  else
     echo "This installation script supports Ubuntu Server or CentOS 7..."
