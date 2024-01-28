@@ -130,12 +130,12 @@ EOF
     read -p "Do you want to proceed with Ansible installation? (y/n): " ANSWER
     if [ "$ANSWER" != "y" ]; then
         echo "Ansible installation skipped."
+        sleep 2 
+        echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
         exit 0
     fi
 
     # Step 6: Access Jenkins
-    echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
-    sleep 5  # Give a few seconds to read the message
 
     #  Install Ansible
     # Step 1: Update the system
@@ -155,6 +155,8 @@ EOF
     ansible --version
 
     echo "Ansible has been installed successfully."
+    sleep 3  # Give a few seconds to read the message
+    echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
 }
 
 function InstallOnCentOS() {
