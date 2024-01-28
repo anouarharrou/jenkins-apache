@@ -107,7 +107,8 @@ sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
     ProxyPassReverse / https://$DOMAIN/
 </VirtualHost>
 EOF
-
+    # add the following line to the end of etc/hosts file
+    echo "172.30.219.186  $DOMAIN" | sudo tee -a /etc/hosts
 
     echo "Apache configured successfully."
     sleep 3  # Give a few seconds to read the message
