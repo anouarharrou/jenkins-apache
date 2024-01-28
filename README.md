@@ -1,8 +1,7 @@
 # DevOps Setup Repository
 
 
-This repository contains scripts to set up a DevOps environment with Jenkins, Apache, and Ansible on Ubuntu.
-
+This repository provides a streamlined solution for setting up a robust DevOps environment on Ubuntu, leveraging Jenkins for continuous integration, Apache as a reverse proxy for a custom domain, and Ansible for automation. The setup includes the generation of a self-signed SSL certificate to ensure secure communication.
 
 ## Installation
 
