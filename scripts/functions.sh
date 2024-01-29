@@ -259,7 +259,7 @@ EOF
     if [ "$ANSWER" != "y" ]; then
         echo "Ansible installation skipped."
         sleep 2
-        echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
+        echo "Installation completed. Access Jenkins at https://$DOMAIN/"
         exit 0
     fi
 
