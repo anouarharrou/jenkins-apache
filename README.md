@@ -40,11 +40,20 @@ chmod +x install-jenkins-apache.sh
 ./install-jenkins-apache.sh yourdomain.com
 ```
     
-Replace yourdomain.com with your actual domain.
+
+###  Replace yourdomain.com with your actual domain.
 
 Follow the prompts to configure Jenkins, generate SSL certificates, and set up Apache.
 
 Optionally, you can choose to install Ansible during the setup.
+
+### The Apache default page may be showing up because the default Apache configuration is still active. The default Apache virtual host may not have been disabled.
+
+You can disable the default site using the following command:
+```bash
+sudo a2dissite 000-default.conf
+sudo systemctl restart apache2
+```
 
 ## Removal
 

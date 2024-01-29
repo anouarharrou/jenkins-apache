@@ -28,14 +28,14 @@ function InstallOnUbuntu() {
     sudo systemctl enable apache2 && sudo systemctl start apache2
 
     # Step 3: Install Java
-    sudo apt install openjdk-11-jdk -y
+    sudo apt install openjdk-17-jdk -y
     java --version
 
     # Step 4: Install Jenkins
     curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee /usr/share/keyrings/jenkins-keyring.asc > /dev/null
     echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list > /dev/null
     sudo apt update -y
-    sudo apt install jenkins=2.401.1 -y
+    sudo apt install jenkins
     sudo systemctl start jenkins && sudo systemctl enable jenkins
 
 
@@ -259,7 +259,7 @@ EOF
     if [ "$ANSWER" != "y" ]; then
         echo "Ansible installation skipped."
         sleep 2
-        echo "Installation completed. Access Jenkins at https://$DOMAIN/"
+        echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
         exit 0
     fi
 
