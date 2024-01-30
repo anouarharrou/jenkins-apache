@@ -23,6 +23,9 @@ function InstallOnUbuntu() {
     # Step 1: Update the System
     sudo apt-get update -y && sudo apt-get upgrade -y
 
+    # add the following line to the end of etc/hosts file
+    echo "$(hostname -I | awk '{print $1}')  $DOMAIN" | sudo tee -a /etc/hosts
+
     # Step 2: Install Apache Web Server
     sudo apt install apache2 -y
     sudo systemctl enable apache2 && sudo systemctl start apache2
@@ -67,8 +70,8 @@ function InstallOnUbuntu() {
     sleep 5  # Give a few seconds to read the message
 
     #Copy the Certificate and Key to the /etc/ssl directory
-    sudo cp jenkins.crt /etc/ssl/certs/
-    sudo cp jenkins.key /etc/ssl/private/
+    sudo mv jenkins.crt /etc/ssl/certs/
+    sudo mv jenkins.key /etc/ssl/private/
     echo "Certificate and Key copied to /etc/ssl directory successfully."
 
 
@@ -108,8 +111,6 @@ NameVirtualHost *:443
 </VirtualHost>
 EOF
 
-    # add the following line to the end of etc/hosts file
-    echo "$(hostname -I | awk '{print $1}')  $DOMAIN" | sudo tee -a /etc/hosts
 
     echo "Apache configured successfully."
     sleep 3  # Give a few seconds to read the message
@@ -220,10 +221,10 @@ function InstallOnCentOS() {
     FQDN="$DOMAIN"
 
     # Update the Apache global configuration file with ServerName
-    echo "ServerName $FQDN" | sudo tee -a /etc/httpd/conf/httpd.conf
+    echo "ServerName $FQDN" | sudo tee -a /etc/apache2/apache2.conf  # For Ubuntu/Debian
 
     # Step 5: Setting up Apache as a Reverse Proxy
-    sudo tee /etc/httpd/conf.d/jenkins.conf > /dev/null <<EOF
+    sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
 NameVirtualHost *:80
 NameVirtualHost *:443
 
