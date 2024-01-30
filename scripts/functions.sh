@@ -76,11 +76,13 @@ function InstallOnUbuntu() {
     FQDN="$DOMAIN"
 
     # Update the Apache global configuration file with ServerName
-    echo "ServerName $FQDN" | sudo tee -a /etc/apache2/apache2.conf  # For Ubuntu/Debian
+echo "ServerName $FQDN" | sudo tee -a /etc/httpd/conf/httpd.conf
 
+# Step 5: Setting up Apache as a Reverse Proxy
+sudo tee /etc/httpd/conf.d/jenkins.conf > /dev/null <<EOF
+NameVirtualHost *:80
+NameVirtualHost *:443
 
-    # Step 5: Setting up Apache as a Reverse Proxy
-sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
 <VirtualHost *:80>
     ServerName $DOMAIN
     Redirect permanent / https://$DOMAIN/
@@ -88,33 +90,32 @@ sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
 
 <VirtualHost *:443>
     ServerName $DOMAIN
-
     SSLEngine on
-    SSLCertificateFile /etc/ssl/certs/jenkins.crt
-    SSLCertificateKeyFile /etc/ssl/private/jenkins.key
-
+    SSLCertificateFile /etc/pki/tls/certs/jenkins.crt
+    SSLCertificateKeyFile /etc/pki/tls/private/jenkins.key
     ProxyRequests Off
     ProxyPreserveHost On
     AllowEncodedSlashes NoDecode
-
-    <Proxy http://localhost:8080/*>
+    <Proxy *>
         Order deny,allow
         Allow from all
     </Proxy>
-
     ProxyPass / http://localhost:8080/ nocanon
     ProxyPassReverse / http://localhost:8080/
-    ProxyPassReverse / https://$DOMAIN/
+    ProxyPassReverse / http://$DOMAIN/
+    RequestHeader set X-Forwarded-Proto "https"
+    RequestHeader set X-Forwarded-Port "443"
 </VirtualHost>
 EOF
+
     # add the following line to the end of etc/hosts file
-    echo "172.30.219.186  $DOMAIN" | sudo tee -a /etc/hosts
+    echo "$(hostname -I | awk '{print $1}')  $DOMAIN" | sudo tee -a /etc/hosts
 
     echo "Apache configured successfully."
     sleep 3  # Give a few seconds to read the message
 
     # Configure Jenkins etc/default/jenkins
-    sudo sed -i "s#HTTP_PORT=8080#HTTP_PORT=8080\nHTTPS_KEYSTORE=\"/etc/ssl/certs/jenkins.crt\"\nHTTPS_KEYSTORE_PASSWORD=\"$PASSPHRASE\"#" /etc/default/jenkins
+    sudo sed -i "s#HTTP_PORT=8080#HTTP_PORT=8080\nHTTPS_KEYSTORE=\"/etc/ssl/certs/jenkins.crt\"\nHTTPS_KEYSTORE_PASSWORD=\"$PASSPHRASE\"\nJENKINS_ARGS=\"--webroot=/var/cache/$NAME/war --httpPort=$HTTP_PORT --prefix=/\"" /etc/default/jenkins
 
     echo "Jenkins configured successfully."
     sleep 3 # Give a few seconds to read the message
@@ -126,6 +127,14 @@ EOF
     sudo a2enmod headers
     sudo a2enmod ssl
     sudo systemctl restart apache2
+
+    # Configure firewall
+    sudo ufw allow ssh
+    sudo ufw allow http
+    sudo ufw allow https
+
+    # Enable firewall
+    sudo ufw enable
 
     # Prompt user for confirmation to install Ansible
     read -p "Do you want to proceed with Ansible installation? (y/n): " ANSWER
@@ -155,7 +164,7 @@ EOF
 
     echo "Ansible has been installed successfully."
     sleep 3  # Give a few seconds to read the message
-    echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
+    echo "Installation completed. Access Jenkins at https://$DOMAIN/"
 }
 
 function InstallOnCentOS() {
@@ -167,7 +176,7 @@ function InstallOnCentOS() {
     sudo systemctl enable httpd && sudo systemctl start httpd
 
     # Step 3: Install Java
-    sudo yum install java-11-openjdk -y
+    sudo yum install java-17-openjdk -y
     java --version
 
     # Step 4: Install Jenkins
@@ -215,6 +224,9 @@ function InstallOnCentOS() {
 
     # Step 5: Setting up Apache as a Reverse Proxy
     sudo tee /etc/httpd/conf.d/jenkins.conf > /dev/null <<EOF
+NameVirtualHost *:80
+NameVirtualHost *:443
+
 <VirtualHost *:80>
     ServerName $DOMAIN
     Redirect permanent / https://$DOMAIN/
@@ -222,25 +234,24 @@ function InstallOnCentOS() {
 
 <VirtualHost *:443>
     ServerName $DOMAIN
-
     SSLEngine on
     SSLCertificateFile /etc/pki/tls/certs/jenkins.crt
     SSLCertificateKeyFile /etc/pki/tls/private/jenkins.key
-
     ProxyRequests Off
     ProxyPreserveHost On
     AllowEncodedSlashes NoDecode
-
-    <Proxy http://localhost:8080/*>
+    <Proxy *>
         Order deny,allow
         Allow from all
     </Proxy>
-
     ProxyPass / http://localhost:8080/ nocanon
     ProxyPassReverse / http://localhost:8080/
-    ProxyPassReverse / https://$DOMAIN/
+    ProxyPassReverse / http://$DOMAIN/
+    RequestHeader set X-Forwarded-Proto "https"
+    RequestHeader set X-Forwarded-Port "443"
 </VirtualHost>
 EOF
+
 
     echo "Apache configured successfully."
     sleep 3  # Give a few seconds to read the message
@@ -259,7 +270,7 @@ EOF
     if [ "$ANSWER" != "y" ]; then
         echo "Ansible installation skipped."
         sleep 2
-        echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
+        echo "Installation completed. Access Jenkins at https://$DOMAIN/"
         exit 0
     fi
 
@@ -275,5 +286,5 @@ EOF
 
     echo "Ansible has been installed successfully."
     sleep 3  # Give a few seconds to read the message
-    echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
+    echo "Installation completed. Access Jenkins at https://$DOMAIN/"
 }
