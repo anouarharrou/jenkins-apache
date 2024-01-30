@@ -34,6 +34,20 @@ Make it executable:
 chmod +x install-jenkins-apache.sh
 ```
 
+# Note: 
+
+if you're on Windows machine and you're using WSL2 on the top of the host to run Ubuntu LTS
+add the following to C:\Windows\System32\drivers\etc\hosts
+
+```script
+C:\Windows\System32\drivers\etc\hosts
+
+.
+..
+IP addr yourdomain.com #IP addr is the ip of ubuntu use ip add show to get the ip addres
+```
+
+
 2. Run the setup script:
 
 ```bash

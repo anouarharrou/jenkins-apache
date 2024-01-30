@@ -25,7 +25,7 @@ function InstallOnUbuntu() {
 
     # add the following line to the end of etc/hosts file
     echo "$(hostname -I | awk '{print $1}')  $DOMAIN" | sudo tee -a /etc/hosts
-
+    
     # Step 2: Install Apache Web Server
     sudo apt install apache2 -y
     sudo systemctl enable apache2 && sudo systemctl start apache2
@@ -79,10 +79,10 @@ function InstallOnUbuntu() {
     FQDN="$DOMAIN"
 
     # Update the Apache global configuration file with ServerName
-echo "ServerName $FQDN" | sudo tee -a /etc/httpd/conf/httpd.conf
+    echo "ServerName $FQDN" | sudo tee -a /etc/apache2/apache2.conf  # For Ubuntu/Debian
 
-# Step 5: Setting up Apache as a Reverse Proxy
-sudo tee /etc/httpd/conf.d/jenkins.conf > /dev/null <<EOF
+    # Step 5: Setting up Apache as a Reverse Proxy
+    sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
 NameVirtualHost *:80
 NameVirtualHost *:443
 
@@ -94,8 +94,8 @@ NameVirtualHost *:443
 <VirtualHost *:443>
     ServerName $DOMAIN
     SSLEngine on
-    SSLCertificateFile /etc/pki/tls/certs/jenkins.crt
-    SSLCertificateKeyFile /etc/pki/tls/private/jenkins.key
+    SSLCertificateFile /etc/ssl/certs/jenkins.crt
+    SSLCertificateKeyFile /etc/ssl/private//jenkins.key
     ProxyRequests Off
     ProxyPreserveHost On
     AllowEncodedSlashes NoDecode
@@ -221,10 +221,10 @@ function InstallOnCentOS() {
     FQDN="$DOMAIN"
 
     # Update the Apache global configuration file with ServerName
-    echo "ServerName $FQDN" | sudo tee -a /etc/apache2/apache2.conf  # For Ubuntu/Debian
+    echo "ServerName $FQDN" | sudo tee -a /etc/httpd/conf/httpd.conf
 
     # Step 5: Setting up Apache as a Reverse Proxy
-    sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
+    sudo tee /etc/httpd/conf.d/jenkins.conf > /dev/null <<EOF
 NameVirtualHost *:80
 NameVirtualHost *:443
 
