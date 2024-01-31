@@ -83,9 +83,6 @@ function InstallOnUbuntu() {
 
     # Step 5: Setting up Apache as a Reverse Proxy
     sudo tee /etc/apache2/sites-available/jenkins.conf > /dev/null <<EOF
-NameVirtualHost *:80
-NameVirtualHost *:443
-
 <VirtualHost *:80>
     ServerName $DOMAIN
     Redirect permanent / https://$DOMAIN/
@@ -225,9 +222,6 @@ function InstallOnCentOS() {
 
     # Step 5: Setting up Apache as a Reverse Proxy
     sudo tee /etc/httpd/conf.d/jenkins.conf > /dev/null <<EOF
-NameVirtualHost *:80
-NameVirtualHost *:443
-
 <VirtualHost *:80>
     ServerName $DOMAIN
     Redirect permanent / https://$DOMAIN/
