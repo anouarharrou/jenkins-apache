@@ -1,4 +1,4 @@
-# DevOps Setup Repository
+# Jenkins with Apche2 Setup Script
 
 
 This repository provides a streamlined solution for setting up a robust DevOps environment on Ubuntu, leveraging Jenkins for continuous integration, Apache as a reverse proxy for a custom domain, and Ansible for automation. The setup includes the generation of a self-signed SSL certificate to ensure secure communication.
