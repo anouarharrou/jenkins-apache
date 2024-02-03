@@ -85,3 +85,9 @@ chmod +x remove-jenkins-apache.sh
 
 This script will stop Jenkins and Apache, remove the packages, and clean up configuration files.
 
+## License
+
+This project is licensed under the [GNU GENERAL PUBLIC LICENSE](./LICENSE).
+
+
+Feel free to customize and enhance the stack according to your needs! 🛠️💡
