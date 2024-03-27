@@ -134,34 +134,6 @@ EOF
     # Enable firewall
     sudo ufw enable
 
-    # Prompt user for confirmation to install Ansible
-    read -p "Do you want to proceed with Ansible installation? (y/n): " ANSWER
-    if [ "$ANSWER" != "y" ]; then
-        echo "Ansible installation skipped."
-        sleep 2 
-        echo "Installation completed. Access Jenkins at https://www.$DOMAIN/"
-        exit 0
-    fi
-
-    #  Install Ansible
-    # Step 1: Update the system
-    sudo apt update -y
-    sudo apt upgrade -y
-
-    # Step 2: Install Software Properties Common
-    sudo apt-get install software-properties-common -y
-
-    # Step 3: Add Ansible PPA
-    sudo apt-add-repository --yes --update ppa:ansible/ansible
-
-    # Step 4: Install Ansible
-    sudo apt-get install ansible -y
-
-    # Step 5: Display Ansible Version
-    ansible --version
-
-    echo "Ansible has been installed successfully."
-    sleep 3  # Give a few seconds to read the message
     echo "Installation completed. Access Jenkins at https://$DOMAIN/"
 }
 
@@ -260,26 +232,5 @@ EOF
     # Restart Jenkins and Apache
     sudo systemctl restart httpd
 
-    # Prompt user for confirmation to install Ansible
-    read -p "Do you want to proceed with Ansible installation? (y/n): " ANSWER
-    if [ "$ANSWER" != "y" ]; then
-        echo "Ansible installation skipped."
-        sleep 2
-        echo "Installation completed. Access Jenkins at https://$DOMAIN/"
-        exit 0
-    fi
-
-    #  Install Ansible
-    # Step 1: Install EPEL repository
-    sudo yum install epel-release -y
-
-    # Step 2: Install Ansible
-    sudo yum install ansible -y
-
-    # Step 3: Display Ansible Version
-    ansible --version
-
-    echo "Ansible has been installed successfully."
-    sleep 3  # Give a few seconds to read the message
     echo "Installation completed. Access Jenkins at https://$DOMAIN/"
 }
