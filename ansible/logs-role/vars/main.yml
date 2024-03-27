@@ -1,9 +1,0 @@
----
-owner: app
-app_dir: "/home/app"
-logs_dir: "{{ app_dir }}/logs"
-logs_pattern: "service.log-*-*-*.*"
-endpoint: "put-your-s3-endpoint-here"
-path_S3: "put-your-s3-bucket-name-here"
-aws_id: "{{ lookup('env', 'AWS_ID') }}"
-aws_key: "{{ lookup('env', 'AWS_KEY') }}"

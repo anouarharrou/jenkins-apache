@@ -1,6 +1,0 @@
----
-owner: app
-certificate: none
-upstream_url: http://localhost:10000
-upstream_proto: http
-proxy_port: 8443

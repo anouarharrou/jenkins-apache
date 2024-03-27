@@ -1,7 +1,0 @@
-galaxy_info:
-  author: Anouar HARRY
-  description: DevOps
-  license: license (GPL-2.0-or-later, MIT, etc)
-  min_ansible_version: latest
-  galaxy_tags: []
-dependencies: []
